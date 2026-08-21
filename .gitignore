@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+expo-env.d.ts
+
+# Generated app assets (produced by scripts/generate-questions.mjs)
+assets/questions.json
+assets/images/
+src/data/generated/

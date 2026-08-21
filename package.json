@@ -1,0 +1,55 @@
+{
+  "name": "pdd-quiz",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Damir Manapov",
+  "license": "MIT",
+  "main": "index.ts",
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "codegen": "node scripts/generate-questions.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --error-on-warnings .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "bash check.sh",
+    "health": "bash health.sh",
+    "all-checks": "bash all-checks.sh",
+    "prepare": "simple-git-hooks"
+  },
+  "dependencies": {
+    "expo": "~57.0.9",
+    "expo-file-system": "~57.0.1",
+    "expo-sharing": "~57.0.8",
+    "expo-sqlite": "~57.0.1",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-safe-area-context": "~5.7.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "~19.2.0",
+    "simple-git-hooks": "^2.13.1",
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "bash all-checks.sh"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "simple-git-hooks"
+    ],
+    "overrides": {
+      "uuid@<11.1.1": ">=11.1.1"
+    }
+  }
+}

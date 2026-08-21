@@ -1,0 +1,48 @@
+import type { QuestionOrder } from './data/quizLogic';
+
+// One dictionary of Russian UI strings (single language, so it is a flat object of
+// strings and string-functions — no Language/localize() machinery).
+export const strings = {
+  appTitle: 'Экзамен ПДД',
+  start: 'Начать',
+  restart: 'Заново',
+  next: 'Далее',
+  showStats: 'Статистика',
+  hideStats: 'Скрыть статистику',
+  settings: 'Настройки',
+  order: 'Порядок вопросов',
+  orderSequential: 'По порядку',
+  orderRandom: 'Случайно',
+  orderWeakest: 'Сложные сначала',
+  sessionSize: 'Вопросов в сессии',
+  question: (index: number, total: number): string => `Вопрос ${index} из ${total}`,
+  correct: 'Верно',
+  incorrect: 'Неверно',
+  explanation: 'Пояснение',
+  progress: (percent: number): string => `${percent}%`,
+  sessionComplete: 'Сессия завершена',
+  sessionScore: (correct: number, total: number): string =>
+    `Правильных ответов: ${correct} из ${total}`,
+  stats: 'Статистика',
+  statsOverall: 'Всего ответов',
+  statsAccuracy: 'Точность',
+  statsByTopic: 'По темам',
+  statsWeakest: 'Слабые вопросы',
+  statsEmpty: 'Пока нет ответов — пройдите сессию, чтобы увидеть статистику.',
+  backup: 'Резервная копия',
+  exportAnswers: 'Экспорт ответов',
+  importAnswers: 'Импорт ответов',
+  exportShared: 'Резервная копия готова к сохранению',
+  exportUnavailable: 'Экспорт недоступен на этом устройстве',
+  importDone: (count: number): string => `Импортировано ответов: ${count}`,
+  importCanceled: 'Импорт отменён',
+  errorTitle: 'Ошибка',
+  backupError: 'Не удалось выполнить операцию с резервной копией',
+  loading: 'Загрузка…',
+} as const;
+
+export const orderLabels: Record<QuestionOrder, string> = {
+  sequential: strings.orderSequential,
+  random: strings.orderRandom,
+  weakest: strings.orderWeakest,
+};
