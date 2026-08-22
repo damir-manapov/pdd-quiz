@@ -106,9 +106,18 @@ traps (properties that were REMOVED and now fail validation — do not set them)
 * `android.edgeToEdgeEnabled` — edge-to-edge is the default; the flag is gone.
 
 Register native modules that ship a config plugin in `plugins` (e.g. `expo-sqlite`,
-`expo-sharing`) — required for prebuild/EAS. Set `icon`, `android.adaptiveIcon`
-(foreground/background/monochrome), and `web.favicon`. Do NOT copy another project's
+`expo-sharing`) — required for prebuild/EAS. Do NOT copy another project's
 `extra.eas.projectId` or `owner` — those are created per-account on first EAS build.
+
+Icon/splash assets to provide (Expo generates the per-platform sizes from these):
+* `icon` — 1024×1024 opaque PNG (Expo rounds it per platform).
+* `android.adaptiveIcon` — `foregroundImage` + `backgroundImage` (1024×1024) and
+  `monochromeImage` (Android 13+ themed icons); keep the mark inside the center ~66%
+  safe zone or it gets cropped by the launcher mask.
+* splash image (via the `expo-splash-screen` plugin) and `web.favicon` (48×48).
+* No design assets? Generate clean placeholders programmatically (e.g. a short Python +
+  Pillow script producing a colored plate + centered text), then install the tool outside
+  the project root and delete it afterward. Replace with real artwork before a store release.
 
 ## 5. Bundled content & assets (Metro needs static requires)
 
@@ -154,6 +163,10 @@ Add `eas.json` with `development` (dev client), `preview` (internal, Android `ap
 sideload testing), and `production` (store `aab`, `autoIncrement`) profiles. Document the
 build command in the README (`npx eas-cli build --platform android --profile preview`;
 requires `eas login` and creates the `projectId` on first run).
+
+For store submission, keep a `store-listing.md` with the marketing copy (Google Play limits:
+short description ≤ 80 chars, full description ≤ 4000 chars) in the app's language(s), plus
+category, keywords, and a note that the placeholder icons must be replaced first.
 
 ## 9. .gitignore additions (beyond node/dist)
 
