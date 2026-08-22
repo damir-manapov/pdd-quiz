@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 16,
   },
   header: {
