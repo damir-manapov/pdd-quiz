@@ -1,6 +1,6 @@
 allowBuilds:
   simple-git-hooks: true
-auditConfig: {}
+auditConfig: { ignoreGhsas: null }
 minimumReleaseAgeExclude:
   - '@biomejs/biome@2.5.10'
   - '@biomejs/cli-darwin-arm64@2.5.10'

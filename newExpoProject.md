@@ -91,9 +91,11 @@ Use `#!/usr/bin/env bash` + `set -euo pipefail`; simple, informative, fail-fast.
 * `all-checks.sh` = both; wired as the `simple-git-hooks` pre-commit hook.
 
 Wire `simple-git-hooks` exactly as `newProject.md` describes. On pnpm 10 the `pnpm` field
-(`onlyBuiltDependencies`, `overrides`) lives in `package.json`; on pnpm 11 it moves to
-`pnpm-workspace.yaml` (`allowBuilds`, `overrides`, `minimumReleaseAge: 0` so EAS installs
-don't fail on freshly-published transitive deps).
+(`onlyBuiltDependencies`, `overrides`) lives in `package.json`. On pnpm 11 that field is
+ignored — move config to `pnpm-workspace.yaml`, where `onlyBuiltDependencies` is **replaced**
+by an `allowBuilds` approval map (`allowBuilds: { simple-git-hooks: true }`) and freshly-
+published packages blocked by pnpm's default supply-chain policy go in
+`minimumReleaseAgeExclude` (see the migration lesson below).
 
 ## 4. app.json — validate with `expo-doctor`, mind the schema
 
@@ -223,3 +225,28 @@ the hook forever.
 swaps and `imageAssets[path]` lookups. `exactOptionalPropertyTypes` forbids assigning
 `undefined` to optional props — build session/domain objects with conditional spreads
 (`...(x !== undefined ? { x } : {})`) instead of `field: x` where `x` may be undefined.
+
+### Migrating to pnpm 11: `allowBuilds` replaces `onlyBuiltDependencies`, and the supply-chain policy gates fresh packages
+The original `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` an EAS build hit on a teammate's machine
+traces back to these two breaking changes — worth doing deliberately, not via a stray
+`corepack use`.
+* Pin the toolchain with `package.json` `"packageManager": "pnpm@X"`; corepack auto-selects it
+  **inside the project**, so you never need `corepack use`. Running `corepack use pnpm@11` in a
+  project still pinned to 10 rewrites the pin and trips the checks below mid-install.
+* pnpm 11 stops reading the `pnpm` field in `package.json`. Move `overrides` to the top level of
+  `pnpm-workspace.yaml`. Leave `auditConfig` out \u2014 `pnpm audit` re-adds its own
+  `auditConfig: { ignoreGhsas: null }` on the next health run; just commit it when it appears.
+* `onlyBuiltDependencies` is **not honored** — a dependency's build/postinstall (e.g.
+  `simple-git-hooks`) is skipped and pnpm reports `[ERR_PNPM_IGNORED_BUILDS]`. Approve it with an
+  `allowBuilds` map (`allowBuilds:` → `  simple-git-hooks: true`). `pnpm install` writes a
+  `set this to true or false` placeholder you must resolve, then re-run to confirm a clean pass.
+  Drop entries for tools that no longer build natively (e.g. vitest 4 no longer pulls `esbuild`).
+* pnpm 11 enforces a default `minimumReleaseAge` supply-chain delay. On a strict machine it hard-
+  fails `[ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION]`; otherwise pnpm auto-appends the offending
+  versions to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml` (e.g. every `@biomejs/*` platform
+  binary). **Commit that list** — it's what lets teammates and EAS install the same fresh versions.
+  Prefer per-package excludes over `minimumReleaseAge: 0`, which disables the protection wholesale.
+* Migration recipe: bump the `packageManager` pin → `corepack prepare pnpm@X --activate` → delete
+  `pnpm-lock.yaml` → `pnpm install` (run directly, not piped — the "remove node_modules? / approve
+  builds" prompts hang behind a pipe) → resolve the `allowBuilds` placeholder → `pnpm install`
+  again → run all gates.
