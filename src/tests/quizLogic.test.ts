@@ -243,4 +243,22 @@ describe('computeStats', () => {
     expect(stats.byTopic.find((t) => t.topic === 'A')?.accuracy).toBeCloseTo(0.5);
     expect(stats.byTopic.find((t) => t.topic === 'B')?.accuracy).toBe(1);
   });
+
+  it('counts per-question mastery (attempted, ever/last/last-three correct)', () => {
+    const questions = [question('1'), question('2'), question('3'), question('4')];
+    const history = [
+      answer('1', true, '2026-01-01T00:00:00Z'),
+      answer('1', true, '2026-01-02T00:00:00Z'),
+      answer('1', true, '2026-01-03T00:00:00Z'),
+      answer('2', true, '2026-01-01T00:00:00Z'),
+      answer('2', false, '2026-01-02T00:00:00Z'),
+      answer('3', true, '2026-01-01T00:00:00Z'),
+    ];
+    const { mastery } = computeStats(history, questions);
+    expect(mastery.totalQuestions).toBe(4);
+    expect(mastery.attempted).toBe(3);
+    expect(mastery.everCorrect).toBe(3);
+    expect(mastery.lastCorrect).toBe(2);
+    expect(mastery.lastThreeCorrect).toBe(1);
+  });
 });

@@ -205,6 +205,16 @@ export type OverallStats = {
   accuracy: number;
   byTopic: TopicStat[];
   weakest: QuestionStat[];
+  mastery: MasteryStats;
+};
+
+// Per-question progress counts (out of the whole bank), independent of raw answer totals.
+export type MasteryStats = {
+  totalQuestions: number; // size of the bank
+  attempted: number; // answered at least once
+  everCorrect: number; // answered correctly at least once
+  lastCorrect: number; // most recent answer was correct
+  lastThreeCorrect: number; // the three most recent answers were all correct
 };
 
 export function computeStats(
@@ -243,7 +253,30 @@ export function computeStats(
     .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 20);
 
+  const byQuestion = new Map<string, AnswerRecord[]>();
+  for (const answer of filtered) {
+    const list = byQuestion.get(answer.questionId) ?? [];
+    list.push(answer);
+    byQuestion.set(answer.questionId, list);
+  }
+  const mastery: MasteryStats = {
+    totalQuestions: questions.length,
+    attempted: byQuestion.size,
+    everCorrect: 0,
+    lastCorrect: 0,
+    lastThreeCorrect: 0,
+  };
+  for (const list of byQuestion.values()) {
+    const sorted = [...list].sort((a, b) => a.answeredAt.localeCompare(b.answeredAt));
+    if (sorted.some((answer) => answer.correct)) mastery.everCorrect += 1;
+    if (sorted[sorted.length - 1]?.correct) mastery.lastCorrect += 1;
+    const lastThree = sorted.slice(-3);
+    if (lastThree.length === 3 && lastThree.every((answer) => answer.correct)) {
+      mastery.lastThreeCorrect += 1;
+    }
+  }
+
   const total = filtered.length;
   const correct = filtered.filter((answer) => answer.correct).length;
-  return { total, correct, accuracy: total > 0 ? correct / total : 0, byTopic, weakest };
+  return { total, correct, accuracy: total > 0 ? correct / total : 0, byTopic, weakest, mastery };
 }
