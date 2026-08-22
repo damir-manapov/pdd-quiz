@@ -6,7 +6,7 @@ import type { QuizOption, QuizQuestion } from './questions';
 export type QuizMode = 'standard';
 export const ALL_MODES: QuizMode[] = ['standard'];
 
-export type QuestionOrder = 'sequential' | 'random' | 'weakest';
+export type QuestionOrder = 'sequential' | 'random' | 'weakest' | 'stale' | 'least-answered';
 
 export type SessionQuestion = {
   id: string;
@@ -139,6 +139,23 @@ function compareWeakness(a: Weakness, b: Weakness): number {
   return a.total - b.total;
 }
 
+// stale: oldest answer first; never-answered ('' sentinel) sorts before any real timestamp.
+function compareStale(a: Weakness, b: Weakness): number {
+  if (a.lastAnsweredAt !== b.lastAnsweredAt) return a.lastAnsweredAt < b.lastAnsweredAt ? -1 : 1;
+  return 0;
+}
+
+// least-answered: fewest attempts first; never-answered (total 0) sorts first.
+function compareLeastAnswered(a: Weakness, b: Weakness): number {
+  return a.total - b.total;
+}
+
+function comparatorFor(order: QuestionOrder): (a: Weakness, b: Weakness) => number {
+  if (order === 'stale') return compareStale;
+  if (order === 'least-answered') return compareLeastAnswered;
+  return compareWeakness;
+}
+
 export function orderQuestions(
   questions: readonly QuizQuestion[],
   order: QuestionOrder,
@@ -148,8 +165,11 @@ export function orderQuestions(
 ): QuizQuestion[] {
   if (order === 'sequential') return [...questions];
   if (order === 'random') return shuffle(questions, random);
-  return [...questions].sort((a, b) =>
-    compareWeakness(weaknessOf(history, a.id, mode), weaknessOf(history, b.id, mode)),
+  // History-based orders: pre-shuffle so tied entries (e.g. all never-answered) come out in
+  // random order. Array.sort is stable, so the shuffle survives among entries that compare equal.
+  const compare = comparatorFor(order);
+  return shuffle(questions, random).sort((a, b) =>
+    compare(weaknessOf(history, a.id, mode), weaknessOf(history, b.id, mode)),
   );
 }
 

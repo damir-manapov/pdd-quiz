@@ -159,6 +159,46 @@ describe('orderQuestions weakest', () => {
     const ordered = orderQuestions(questions, 'weakest', history, 'standard');
     expect(ordered).toHaveLength(1);
   });
+
+  it('randomises ties via a pre-shuffle (stable sort preserves it)', () => {
+    const questions = [question('1'), question('2'), question('3'), question('4')];
+    const seed = [0.99, 0.6, 0.2];
+    // All never-answered => all tie => output equals the pre-shuffle order.
+    const ordered = orderQuestions(questions, 'weakest', [], 'standard', seededRandom(seed));
+    const expected = shuffle(questions, seededRandom(seed));
+    expect(ordered.map((q) => q.id)).toEqual(expected.map((q) => q.id));
+  });
+});
+
+describe('orderQuestions stale', () => {
+  it('orders by oldest answer first, never-answered before all', () => {
+    const questions = [question('1'), question('2'), question('3')];
+    const history = [
+      answer('1', true, '2026-01-03T00:00:00Z'),
+      answer('2', true, '2026-01-01T00:00:00Z'),
+    ];
+    const ordered = orderQuestions(questions, 'stale', history, 'standard', seededRandom([0.5]));
+    expect(ordered.map((q) => q.id)).toEqual(['3', '2', '1']);
+  });
+});
+
+describe('orderQuestions least-answered', () => {
+  it('orders by fewest attempts first, regardless of correctness', () => {
+    const questions = [question('1'), question('2'), question('3')];
+    const history = [
+      answer('1', true, '2026-01-01T00:00:00Z'),
+      answer('1', false, '2026-01-02T00:00:00Z'),
+      answer('2', true, '2026-01-01T00:00:00Z'),
+    ];
+    const ordered = orderQuestions(
+      questions,
+      'least-answered',
+      history,
+      'standard',
+      seededRandom([0.5]),
+    );
+    expect(ordered.map((q) => q.id)).toEqual(['3', '2', '1']);
+  });
 });
 
 describe('buildSession', () => {
