@@ -135,7 +135,9 @@ ETL/codegen step (`scripts/generate-*.ts`), not hand-authoring:
 * Give the codegen its own fidelity checks (unique ids, valid answer refs, every referenced
   image exists on disk) so import/transcription mistakes fail loudly.
 * Keep generated files gitignored; regenerate via a `codegen` script. Commit the raw source
-  data instead.
+  data instead. Because EAS bundles from committed files only, wire the same script into an
+  `eas-build-post-install` npm hook so the build server regenerates them before Metro runs
+  (see §8) — otherwise the bundle fails with `Unable to resolve module .../generated/...`.
 * For official/legal content: record exactly which source/version/date was imported, verify
   licensing before bundling, and add content-invariant tests over the bank.
 
@@ -170,10 +172,13 @@ outputs by passing a seeded `random`, not "it didn't crash". Vitest 4 may warn t
 Add `eas.json` with `development` (dev client), `preview` (internal, Android `apk` for
 sideload testing), and `production` (store `aab`, `autoIncrement`) profiles. Document the
 build command in the README (`npx eas-cli build --platform android --profile preview`;
-requires `eas login` and creates the `projectId` on first run). EAS resolves the app config
-(plugins, generated assets) **locally** before upload, so `pnpm install` and any `codegen` must
-have run in the checkout first — a fresh clone that skips them fails with `Failed to resolve
-plugin ... Do you have node modules installed?`.
+requires `eas login` and creates the `projectId` on first run). EAS evaluates the app config
+(plugins) **locally** before upload, so `pnpm install` and any `codegen` must have run in the
+checkout first — a fresh clone that skips them fails with `Failed to resolve plugin ... Do you
+have node modules installed?`. But the **Metro bundle runs on the EAS server from committed
+files only**, so gitignored generated assets (§5) are absent there. Regenerate them on the
+server with an `eas-build-post-install` npm script (`"eas-build-post-install": "node
+scripts/generate-*.ts"`), which EAS runs after `pnpm install` and before bundling.
 
 For store submission, keep a `store-listing.md` with the marketing copy (Google Play limits:
 short description ≤ 80 chars, full description ≤ 4000 chars) in the app's language(s), plus
@@ -219,6 +224,16 @@ so this only surfaces at prebuild/EAS time.
 Bundled images must be referenced by static string-literal `require('./assets/x.png')`. Codegen
 a `Record<path, require(...)>` lookup table over the content bank rather than building paths at
 runtime.
+
+### Gitignored generated assets need an `eas-build-post-install` codegen hook
+EAS Build uploads **only committed files** and runs Metro on its server, so anything the
+codegen emits (the `assets/` bundle + the generated `imageAssets.ts` require-map) is missing
+there and the bundle dies with `Unable to resolve module ../data/generated/imageAssets`. Local
+`expo start` doesn't catch it because the files already exist in your working tree. Don't fix
+this by committing the generated output (it duplicates the raw source — e.g. hundreds of
+images). Instead add `"eas-build-post-install": "node scripts/generate-*.ts"` to `scripts`;
+EAS runs it after `pnpm install`, regenerating everything from the committed raw data before
+bundling. Verify by deleting the generated dirs and re-running the hook locally.
 
 ### Don't `pnpm outdated` the Expo/RN packages
 `react-native`, `react`, and `expo-*` are pinned to the installed SDK; they will always show as
