@@ -89,15 +89,41 @@ if (errors.length > 0) {
   throw new Error(`Dataset fidelity check failed:\n - ${errors.slice(0, 30).join('\n - ')}`);
 }
 
+// The scraped source encodes punctuation as HTML entities (« » — … etc.); decode them so
+// the app renders real characters instead of literal "&laquo;".
+const namedEntities: Record<string, string> = {
+  laquo: '«',
+  raquo: '»',
+  nbsp: '\u00a0',
+  quot: '"',
+  ndash: '–',
+  mdash: '—',
+  hellip: '…',
+  amp: '&',
+  lt: '<',
+  gt: '>',
+};
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, code: string) =>
+      String.fromCodePoint(Number.parseInt(code, 16)),
+    )
+    .replace(/&([a-zA-Z]+);/g, (match, name: string) => namedEntities[name] ?? match);
+}
+
 // --- Normalise into the app's QuizQuestion shape (drop reference-only fields) ---
 const cleaned: GeneratedQuestion[] = questions.map((q) => ({
   id: String(q.id),
   topic: String(q.topic ?? q.category ?? 'ПДД'),
-  text: String(q.text).trim(),
-  options: (q.options ?? []).map((o) => ({ id: String(o.id), text: String(o.text).trim() })),
+  text: decodeEntities(String(q.text).trim()),
+  options: (q.options ?? []).map((o) => ({
+    id: String(o.id),
+    text: decodeEntities(String(o.text).trim()),
+  })),
   correctOptionId: String(q.correctOptionId),
   ...(q.code ? { code: String(q.code) } : {}),
-  ...(q.explanation ? { explanation: String(q.explanation).trim() } : {}),
+  ...(q.explanation ? { explanation: decodeEntities(String(q.explanation).trim()) } : {}),
   ...(q.imagePath ? { imagePath: String(q.imagePath).replace(/^data\//, '') } : {}),
 }));
 
