@@ -24,9 +24,6 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sqlite",
-      "expo-sharing",
-      "expo-status-bar",
       [
         "expo-splash-screen",
         {
