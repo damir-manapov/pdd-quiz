@@ -5,8 +5,28 @@ web-build/
 *.log
 .DS_Store
 expo-env.d.ts
+.metro-health-check*
 
-# Generated app assets (produced by scripts/generate-questions.mjs)
+# Generated native folders
+/ios
+/android
+
+# Native / signing secrets
+*.jks
+*.p8
+*.p12
+*.key
+*.keystore
+*.mobileprovision
+*.orig.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Local env files
+.env*.local
+
+# Generated app assets (produced by scripts/generate-questions.ts)
 assets/questions.json
 assets/images/
 src/data/generated/

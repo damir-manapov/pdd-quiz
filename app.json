@@ -6,9 +6,11 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0b1220"
+      "backgroundColor": "#0f172a"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -17,11 +19,17 @@
     },
     "android": {
       "package": "ru.pddquiz.app",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-status-bar"]
+    "plugins": ["expo-sqlite", "expo-sharing", "expo-status-bar"]
   }
 }
