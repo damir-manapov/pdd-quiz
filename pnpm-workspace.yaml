@@ -1,6 +1,11 @@
 allowBuilds:
   simple-git-hooks: true
-auditConfig: { ignoreGhsas: null }
+auditConfig:
+  # image-size <=2.0.2 DoS (GHSA-w3rx-r6r6-pgpr ICNS, GHSA-5p2g-fcmc-qvqq JXL/HEIF): transitive
+  # via expo>metro; the fix is a major bump (2.0.3) Metro can't take. Build-only, not shipped.
+  ignoreGhsas:
+    - 'GHSA-w3rx-r6r6-pgpr'
+    - 'GHSA-5p2g-fcmc-qvqq'
 minimumReleaseAgeExclude:
   - '@biomejs/biome@2.5.10'
   - '@biomejs/cli-darwin-arm64@2.5.10'

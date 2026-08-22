@@ -22,8 +22,9 @@ else
 fi
 
 echo "=== Vulnerabilities (pnpm audit) ==="
-# --ignore-unfixable: don't block the hook on advisories with no published fix yet;
-# still fails on anything we can actually resolve (e.g. via a pnpm override).
-pnpm audit --ignore-unfixable
+# Plain audit (no --ignore-unfixable: that flag rewrites auditConfig on every run, churning the
+# workspace file). Genuinely-unfixable advisories are pinned explicitly in
+# pnpm-workspace.yaml's auditConfig.ignoreGhsas; anything else must be fixed via an override.
+pnpm audit
 
 echo "=== health.sh OK ==="

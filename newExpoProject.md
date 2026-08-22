@@ -86,7 +86,8 @@ Use `#!/usr/bin/env bash` + `set -euo pipefail`; simple, informative, fail-fast.
     are SDK-pinned and would always look "outdated").
   * `pnpm outdated <dev-tooling-only>` (e.g. `vitest @types/react @types/node @biomejs/biome
     simple-git-hooks`) — dev deps you actually control.
-  * `pnpm audit --ignore-unfixable`.
+  * `pnpm audit` (plain — do NOT use `--ignore-unfixable`, which churns `auditConfig` every
+    run; pin genuinely-unfixable advisories in `auditConfig.ignoreGhsas` instead, see lesson).
   * `pnpm dlx expo-doctor@latest` — MUST pass (see §4).
 * `all-checks.sh` = both; wired as the `simple-git-hooks` pre-commit hook.
 
@@ -215,10 +216,12 @@ main `tsc` run and import app types. Add `@types/node`; avoid TS-only runtime fe
 
 ### Transitive advisory in Expo build tooling
 `pnpm audit` can flag a transitive dep deep in Expo's tooling (e.g. `xcode > uuid`). If a fix
-exists, pin it via a pnpm `overrides` entry (`"uuid@<11.1.1": ">=11.1.1"`) after confirming the
-consumer's API usage survives the bump; delete the lockfile and reinstall so the branch
-re-resolves. Use `pnpm audit --ignore-unfixable` so genuinely-unfixable advisories don't block
-the hook forever.
+exists that the consumer can take, pin it via a pnpm `overrides` entry
+(`"uuid@<11.1.1": ">=11.1.1"`) after confirming the consumer's API usage survives the bump;
+delete the lockfile and reinstall so the branch re-resolves. When the only "fix" is a MAJOR
+bump the consumer can't take (e.g. Metro pins `image-size` 1.x, patched only in 2.x, so the
+override breaks `pnpm install`), treat it as unfixable: pin the specific `GHSA-...` ids in
+`auditConfig.ignoreGhsas` (see the audit-churn lesson) rather than forcing the bump.
 
 ### Strict flags bite React Native code specifically
 `noUncheckedIndexedAccess` makes `array[i]` / `record[key]` `T | undefined` — guard shuffle
@@ -233,9 +236,8 @@ traces back to these two breaking changes — worth doing deliberately, not via 
 * Pin the toolchain with `package.json` `"packageManager": "pnpm@X"`; corepack auto-selects it
   **inside the project**, so you never need `corepack use`. Running `corepack use pnpm@11` in a
   project still pinned to 10 rewrites the pin and trips the checks below mid-install.
-* pnpm 11 stops reading the `pnpm` field in `package.json`. Move `overrides` to the top level of
-  `pnpm-workspace.yaml`. Leave `auditConfig` out \u2014 `pnpm audit` re-adds its own
-  `auditConfig: { ignoreGhsas: null }` on the next health run; just commit it when it appears.
+* pnpm 11 stops reading the `pnpm` field in `package.json`. Move `overrides` and `auditConfig`
+  to the top level of `pnpm-workspace.yaml`.
 * `onlyBuiltDependencies` is **not honored** — a dependency's build/postinstall (e.g.
   `simple-git-hooks`) is skipped and pnpm reports `[ERR_PNPM_IGNORED_BUILDS]`. Approve it with an
   `allowBuilds` map (`allowBuilds:` → `  simple-git-hooks: true`). `pnpm install` writes a
@@ -250,3 +252,17 @@ traces back to these two breaking changes — worth doing deliberately, not via 
   `pnpm-lock.yaml` → `pnpm install` (run directly, not piped — the "remove node_modules? / approve
   builds" prompts hang behind a pipe) → resolve the `allowBuilds` placeholder → `pnpm install`
   again → run all gates.
+
+### `pnpm audit --ignore-unfixable` churns `auditConfig` every run — pin GHSAs instead
+`pnpm audit --ignore-unfixable` rewrites `auditConfig` on every invocation when there's nothing
+new to record, toggling `auditConfig: {}` ⇄ `auditConfig: { ignoreGhsas: null }`. Inside the
+pre-commit hook that leaves `pnpm-workspace.yaml` perpetually dirty (a fresh one-line diff after
+every commit), and no committed value is stable. Fix: drop the flag, run **plain `pnpm audit`**,
+and record each genuinely-unfixable advisory explicitly:
+```yaml
+auditConfig:
+  ignoreGhsas:
+    - 'GHSA-w3rx-r6r6-pgpr'   # image-size DoS, transitive via expo>metro, build-only
+```
+Plain `pnpm audit` reads that list, exits 0, and never rewrites the file — and each ignore is an
+explicit, greppable line you can annotate with *why* it's safe.
