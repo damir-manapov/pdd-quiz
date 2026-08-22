@@ -108,9 +108,12 @@ traps (properties that were REMOVED and now fail validation — do not set them)
   "backgroundColor": "#..." }]`).
 * `android.edgeToEdgeEnabled` — edge-to-edge is the default; the flag is gone.
 
-Register native modules that ship a config plugin in `plugins` (e.g. `expo-sqlite`,
-`expo-sharing`) — required for prebuild/EAS. Do NOT copy another project's
-`extra.eas.projectId` or `owner` — those are created per-account on first EAS build.
+Only list packages in `plugins` that actually need config-time native changes (e.g.
+`expo-splash-screen`). Autolinked native modules like `expo-sqlite`, `expo-sharing`, and
+`expo-status-bar` link automatically and must NOT be added — listing them adds fragile
+config-plugin resolution that fails (`Failed to resolve plugin for module ...`) when
+`node_modules` is absent or under pnpm's symlinked layout on Windows. Do NOT copy another
+project's `extra.eas.projectId` or `owner` — those are created per-account on first EAS build.
 
 Icon/splash assets to provide (Expo generates the per-platform sizes from these):
 * `icon` — 1024×1024 opaque PNG (Expo rounds it per platform).
@@ -158,14 +161,19 @@ ETL/codegen step (`scripts/generate-*.ts`), not hand-authoring:
 Vitest tests pure logic ONLY (`<domain>Logic.ts`, `databaseMappers.ts`, `backupFormat.ts`,
 content invariants) — never React components, native modules, or timers.
 `vitest.config.ts`: `include: ['src/tests/**/*.test.ts']`, `environment: 'node'`. Assert exact
-outputs by passing a seeded `random`, not "it didn't crash".
+outputs by passing a seeded `random`, not "it didn't crash". Vitest 4 may warn that
+`vitest.config.ts` uses ESM syntax while loaded as CommonJS — harmless; leave it, since adding
+`"type": "module"` to silence it risks Metro/Expo's CommonJS assumptions.
 
 ## 8. EAS Build
 
 Add `eas.json` with `development` (dev client), `preview` (internal, Android `apk` for
 sideload testing), and `production` (store `aab`, `autoIncrement`) profiles. Document the
 build command in the README (`npx eas-cli build --platform android --profile preview`;
-requires `eas login` and creates the `projectId` on first run).
+requires `eas login` and creates the `projectId` on first run). EAS resolves the app config
+(plugins, generated assets) **locally** before upload, so `pnpm install` and any `codegen` must
+have run in the checkout first — a fresh clone that skips them fails with `Failed to resolve
+plugin ... Do you have node modules installed?`.
 
 For store submission, keep a `store-listing.md` with the marketing copy (Google Play limits:
 short description ≤ 80 chars, full description ≤ 4000 chars) in the app's language(s), plus
@@ -198,6 +206,14 @@ Put `expo-doctor` in `health.sh` so it's gated on every commit.
 ### Configure splash via the plugin, not the top-level key
 `expo install expo-splash-screen` and configure it in `plugins`. The old top-level `splash`
 object is rejected by the current schema.
+
+### Only config plugins belong in `plugins` — not autolinked modules
+Autolinked native modules (`expo-sqlite`, `expo-sharing`, `expo-status-bar`) are linked without
+any `app.json` entry. Listing them in `plugins` "to be safe" adds config-plugin resolution that
+fails with `Failed to resolve plugin for module <pkg>` whenever `node_modules` isn't installed
+(fresh clone, CI) or under pnpm's symlinked layout on Windows. Keep `plugins` to packages that
+really modify native build config (e.g. `expo-splash-screen`); `expo-doctor` passes either way,
+so this only surfaces at prebuild/EAS time.
 
 ### Metro can't resolve dynamic `require()` — generate a static asset map
 Bundled images must be referenced by static string-literal `require('./assets/x.png')`. Codegen
