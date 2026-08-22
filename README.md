@@ -56,6 +56,18 @@ The bundled question bank and image asset map are generated from the raw data in
 pnpm run codegen
 ```
 
+## Building an APK (EAS)
+
+Build profiles live in `eas.json`. The `preview` profile produces an installable Android
+`.apk` for sideload testing; `production` builds an `.aab` for the Play Store; `development`
+builds a dev client.
+
+```bash
+npx eas-cli build --platform android --profile preview
+```
+
+Requires `eas login` on first use; the EAS `projectId` is created on the first build.
+
 ## Project structure
 
 ```
