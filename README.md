@@ -56,6 +56,11 @@ The bundled question bank and image asset map are generated from the raw data in
 pnpm run codegen
 ```
 
+The generated output (`assets/questions.json`, `assets/images/`, and
+`src/data/generated/imageAssets.ts`) is gitignored — only the raw `data/` source is
+committed. Run `pnpm run codegen` once after cloning so the app can load the bank. EAS
+builds regenerate it automatically via the `eas-build-post-install` hook.
+
 ## Building an APK (EAS)
 
 Build profiles live in `eas.json`. The `preview` profile produces an installable Android
@@ -66,7 +71,9 @@ builds a dev client.
 npx eas-cli build --platform android --profile preview
 ```
 
-Requires `eas login` on first use; the EAS `projectId` is created on the first build.
+Requires `eas login` on first use; the EAS `projectId` is created on the first build. The
+gitignored generated assets are rebuilt on the EAS server by the `eas-build-post-install`
+npm hook (which runs `codegen`), so no manual codegen step is needed before a build.
 
 ## Project structure
 
