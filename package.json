@@ -12,6 +12,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "codegen": "node scripts/generate-questions.ts",
+    "eas-build-post-install": "node scripts/generate-questions.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --error-on-warnings .",
     "format": "biome check --write .",
