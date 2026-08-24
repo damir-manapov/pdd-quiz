@@ -1,7 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  BackHandler,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { shouldHandleBack } from './backNavigation';
 import { QuizCard } from './components/QuizCard';
 import { SettingsControls } from './components/SettingsControls';
 import { StatsView } from './components/StatsView';
@@ -18,6 +26,17 @@ export default function App() {
   const stats = useStats(quiz.history);
   const backup = useBackup(quiz.reload);
   const [showStats, setShowStats] = useState<boolean>(false);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!shouldHandleBack(quiz.status)) {
+        return false;
+      }
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, [quiz.status]);
 
   return (
     <SafeAreaProvider>

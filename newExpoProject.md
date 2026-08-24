@@ -254,6 +254,14 @@ bump the consumer can't take (e.g. Metro pins `image-size` 1.x, patched only in 
 override breaks `pnpm install`), treat it as unfixable: pin the specific `GHSA-...` ids in
 `auditConfig.ignoreGhsas` (see the audit-churn lesson) rather than forcing the bump.
 
+### Back button handling is required for active user flows
+React Native's default Android hardware back behavior exits the app when no listener handles
+`hardwareBackPress`. For any flow with an in-progress session (quiz, form, stepper, etc.),
+register a `BackHandler.addEventListener` and return `true` while the flow is active. Only let
+it bubble to the default exit behavior when the app is truly at the ready/idle screen.
+This prevents a mid-question "back" press from closing the entire app and is a common
+Expo/React Native regression during screen composition changes.
+
 ### Strict flags bite React Native code specifically
 `noUncheckedIndexedAccess` makes `array[i]` / `record[key]` `T | undefined` — guard shuffle
 swaps and `imageAssets[path]` lookups. `exactOptionalPropertyTypes` forbids assigning

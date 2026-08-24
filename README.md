@@ -12,6 +12,8 @@ locally in SQLite, so the app works with no network connection and no accounts.
 - Question ordering: sequential, random, or **weakest-first** (adaptive — recently missed
   and never-seen questions surface first, per quiz mode).
 - Answer history persisted locally in SQLite; per-topic and overall accuracy stats.
+- Android hardware back is intercepted while a quiz is active so the app does not close
+  mid-question; the back button remains available when the app is idle.
 - Local backup/restore of answer history to a JSON file (share sheet on iOS, file picker
   on import) — no backend, no accounts, fully offline.
 

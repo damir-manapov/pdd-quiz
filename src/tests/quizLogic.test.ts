@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { shouldHandleBack } from '../backNavigation';
 import type { QuizQuestion } from '../data/questions';
 import type { AnswerRecord } from '../data/quizLogic';
 import {
@@ -41,6 +42,15 @@ const answer = (
   answeredAt: string,
   optionId = `${questionId}:1`,
 ): AnswerRecord => ({ questionId, mode: 'standard', optionId, correct, answeredAt });
+
+describe('shouldHandleBack', () => {
+  it('intercepts the Android back button during a live quiz or summary', () => {
+    expect(shouldHandleBack('ready')).toBe(false);
+    expect(shouldHandleBack('active')).toBe(true);
+    expect(shouldHandleBack('finished')).toBe(true);
+    expect(shouldHandleBack('loading')).toBe(true);
+  });
+});
 
 describe('shuffle', () => {
   it('keeps every element (permutation)', () => {
