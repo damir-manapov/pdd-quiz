@@ -25,6 +25,7 @@ const ORDERS: QuestionOrder[] = [
   'stale',
   'least-answered',
   'incorrect-streak',
+  'has-two-incorrect',
   'least-correct-streak',
 ];
 const SESSION_SIZES = [10, 20, 40];
