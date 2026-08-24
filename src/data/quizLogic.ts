@@ -12,7 +12,8 @@ export type QuestionOrder =
   | 'weakest'
   | 'stale'
   | 'least-answered'
-  | 'incorrect-streak';
+  | 'incorrect-streak'
+  | 'least-correct-streak';
 
 export type SessionQuestion = {
   id: string;
@@ -113,6 +114,7 @@ type Weakness = {
   lastAnsweredAt: string;
   total: number;
   hasRecentIncorrectStreak: boolean;
+  recentCorrectStreak: number;
 };
 
 function recentForQuestion(
@@ -134,7 +136,13 @@ function weaknessOf(
   const recent = recentForQuestion(history, questionId, mode);
   if (recent.length === 0) {
     // Never answered sorts first: accuracy -1 beats any real accuracy, '' beats any timestamp.
-    return { accuracy: -1, lastAnsweredAt: '', total: 0, hasRecentIncorrectStreak: false };
+    return {
+      accuracy: -1,
+      lastAnsweredAt: '',
+      total: 0,
+      hasRecentIncorrectStreak: false,
+      recentCorrectStreak: 0,
+    };
   }
   const correct = recent.filter((answer) => answer.correct).length;
   const lastAnsweredAt = recent.reduce(
@@ -147,11 +155,16 @@ function weaknessOf(
     incorrectStreak = answer.correct ? 0 : incorrectStreak + 1;
     if (incorrectStreak >= 2) hasRecentIncorrectStreak = true;
   }
+  let recentCorrectStreak = 0;
+  for (let index = recent.length - 1; index >= 0 && recent[index]?.correct; index -= 1) {
+    recentCorrectStreak += 1;
+  }
   return {
     accuracy: correct / recent.length,
     lastAnsweredAt,
     total: recent.length,
     hasRecentIncorrectStreak,
+    recentCorrectStreak,
   };
 }
 
@@ -179,10 +192,18 @@ function compareIncorrectStreak(a: Weakness, b: Weakness): number {
   return compareWeakness(a, b);
 }
 
+function compareLeastCorrectStreak(a: Weakness, b: Weakness): number {
+  if (a.recentCorrectStreak !== b.recentCorrectStreak) {
+    return a.recentCorrectStreak - b.recentCorrectStreak;
+  }
+  return compareWeakness(a, b);
+}
+
 function comparatorFor(order: QuestionOrder): (a: Weakness, b: Weakness) => number {
   if (order === 'stale') return compareStale;
   if (order === 'least-answered') return compareLeastAnswered;
   if (order === 'incorrect-streak') return compareIncorrectStreak;
+  if (order === 'least-correct-streak') return compareLeastCorrectStreak;
   return compareWeakness;
 }
 
@@ -308,7 +329,7 @@ export function computeStats(
   const rareAnswerGroups = [...answerCountGroups.entries()]
     .map(([answerCount, questionCount]) => ({ answerCount, questionCount }))
     .sort((a, b) => a.answerCount - b.answerCount)
-    .slice(0, 3);
+    .slice(0, 6);
 
   const byQuestion = new Map<string, AnswerRecord[]>();
   for (const answer of filtered) {
@@ -363,7 +384,7 @@ export function computeStats(
   const rareCorrectStreakGroups = [...correctStreakGroups.entries()]
     .map(([correctCount, questionCount]) => ({ correctCount, questionCount }))
     .sort((a, b) => a.correctCount - b.correctCount)
-    .slice(0, 3);
+    .slice(0, 6);
 
   const total = filtered.length;
   const correct = filtered.filter((answer) => answer.correct).length;

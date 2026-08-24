@@ -240,6 +240,27 @@ describe('orderQuestions incorrect-streak', () => {
   });
 });
 
+describe('orderQuestions least-correct-streak', () => {
+  it('puts the questions with the shortest recent correct streak first', () => {
+    const questions = [question('1'), question('2'), question('3')];
+    const history = [
+      answer('1', true, '2026-01-01'),
+      answer('1', true, '2026-01-02'),
+      answer('2', false, '2026-01-01'),
+      answer('2', true, '2026-01-02'),
+      answer('3', false, '2026-01-01'),
+    ];
+    const ordered = orderQuestions(
+      questions,
+      'least-correct-streak',
+      history,
+      'standard',
+      seededRandom([0.5]),
+    );
+    expect(ordered.map((item) => item.id)).toEqual(['3', '2', '1']);
+  });
+});
+
 describe('buildSession', () => {
   it('respects the requested count and only eligible questions', () => {
     const questions = [question('1'), question('2'), { ...question('3'), correctOptionId: 'bad' }];
@@ -343,8 +364,8 @@ describe('computeStats', () => {
     expect(mastery.everThreeIncorrect).toBe(1);
   });
 
-  it('groups the three lowest answer counts across questions', () => {
-    const questions = Array.from({ length: 8 }, (_, index) => question(String(index + 1)));
+  it('groups the six lowest answer counts across questions', () => {
+    const questions = Array.from({ length: 10 }, (_, index) => question(String(index + 1)));
     const history = [
       ...Array.from({ length: 2 }, (_, index) => answer('1', true, `2026-01-0${index + 1}`)),
       ...Array.from({ length: 2 }, (_, index) => answer('2', true, `2026-02-0${index + 1}`)),
@@ -354,16 +375,21 @@ describe('computeStats', () => {
       ...Array.from({ length: 4 }, (_, index) => answer('6', true, `2026-06-0${index + 1}`)),
       ...Array.from({ length: 5 }, (_, index) => answer('7', true, `2026-07-0${index + 1}`)),
       ...Array.from({ length: 5 }, (_, index) => answer('8', true, `2026-08-0${index + 1}`)),
+      ...Array.from({ length: 6 }, (_, index) => answer('9', true, `2026-09-0${index + 1}`)),
+      ...Array.from({ length: 7 }, (_, index) => answer('10', true, `2026-10-0${index + 1}`)),
     ];
 
     expect(computeStats(history, questions).rareAnswerGroups).toEqual([
       { answerCount: 2, questionCount: 2 },
       { answerCount: 3, questionCount: 3 },
       { answerCount: 4, questionCount: 1 },
+      { answerCount: 5, questionCount: 2 },
+      { answerCount: 6, questionCount: 1 },
+      { answerCount: 7, questionCount: 1 },
     ]);
   });
 
-  it('groups the three lowest current correct streaks across questions', () => {
+  it('groups the lowest current correct streaks across questions', () => {
     const questions = Array.from({ length: 5 }, (_, index) => question(String(index + 1)));
     const history = [
       answer('1', false, '2026-01-01'),
@@ -384,6 +410,7 @@ describe('computeStats', () => {
       { correctCount: 0, questionCount: 1 },
       { correctCount: 1, questionCount: 1 },
       { correctCount: 2, questionCount: 2 },
+      { correctCount: 4, questionCount: 1 },
     ]);
   });
 });
