@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import type { QuestionOrder } from '../data/quizLogic';
 import { orderLabels, strings } from '../strings';
@@ -40,6 +41,7 @@ export function SettingsControls({
   onImport,
   backupBusy,
 }: SettingsControlsProps) {
+  const [categoryOpen, setCategoryOpen] = useState(false);
   return (
     <View>
       <Text style={styles.subheader}>{strings.order}</Text>
@@ -60,23 +62,33 @@ export function SettingsControls({
         })}
       </View>
 
-      <Text style={styles.subheader}>{strings.category}</Text>
-      <View style={styles.row}>
-        {[null, ...topics].map((value) => {
-          const active = value === topic;
-          return (
-            <TouchableOpacity
-              key={value ?? 'all'}
-              style={[styles.chip, active ? styles.chipActive : null]}
-              onPress={() => onTopicChange(value)}
-            >
-              <Text style={[styles.chipText, active ? styles.chipTextActive : null]}>
-                {value ?? strings.allCategories}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      <TouchableOpacity style={styles.subheaderToggle} onPress={() => setCategoryOpen((v) => !v)}>
+        <Text style={styles.subheader}>{strings.category}</Text>
+        <Text style={styles.subheaderToggleValue}>
+          {(topic ?? strings.allCategories) + (categoryOpen ? '  ▲' : '  ▼')}
+        </Text>
+      </TouchableOpacity>
+      {categoryOpen ? (
+        <View style={styles.row}>
+          {[null, ...topics].map((value) => {
+            const active = value === topic;
+            return (
+              <TouchableOpacity
+                key={value ?? 'all'}
+                style={[styles.chip, active ? styles.chipActive : null]}
+                onPress={() => {
+                  onTopicChange(value);
+                  setCategoryOpen(false);
+                }}
+              >
+                <Text style={[styles.chipText, active ? styles.chipTextActive : null]}>
+                  {value ?? strings.allCategories}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      ) : null}
 
       <Text style={styles.subheader}>{strings.sessionSize}</Text>
       <View style={styles.row}>

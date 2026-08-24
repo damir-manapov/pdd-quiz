@@ -35,6 +35,18 @@ export const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
+  subheaderToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  subheaderToggleValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+    marginTop: 16,
+    marginBottom: 8,
+  },
   muted: {
     color: colors.textMuted,
     fontSize: 14,
