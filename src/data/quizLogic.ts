@@ -199,12 +199,14 @@ export function getProgressPercent(answered: number, total: number): number {
 
 export type TopicStat = { topic: string; total: number; correct: number; accuracy: number };
 export type QuestionStat = { questionId: string; total: number; correct: number; accuracy: number };
+export type AnswerCountGroup = { answerCount: number; questionCount: number };
 export type OverallStats = {
   total: number;
   correct: number;
   accuracy: number;
   byTopic: TopicStat[];
   weakest: QuestionStat[];
+  rareAnswerGroups: AnswerCountGroup[];
   mastery: MasteryStats;
 };
 
@@ -253,6 +255,16 @@ export function computeStats(
     .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 20);
 
+  const answerCountGroups = new Map<number, number>();
+  for (const question of questions) {
+    const answerCount = questionAgg.get(question.id)?.total ?? 0;
+    answerCountGroups.set(answerCount, (answerCountGroups.get(answerCount) ?? 0) + 1);
+  }
+  const rareAnswerGroups = [...answerCountGroups.entries()]
+    .map(([answerCount, questionCount]) => ({ answerCount, questionCount }))
+    .sort((a, b) => a.answerCount - b.answerCount)
+    .slice(0, 3);
+
   const byQuestion = new Map<string, AnswerRecord[]>();
   for (const answer of filtered) {
     const list = byQuestion.get(answer.questionId) ?? [];
@@ -278,5 +290,13 @@ export function computeStats(
 
   const total = filtered.length;
   const correct = filtered.filter((answer) => answer.correct).length;
-  return { total, correct, accuracy: total > 0 ? correct / total : 0, byTopic, weakest, mastery };
+  return {
+    total,
+    correct,
+    accuracy: total > 0 ? correct / total : 0,
+    byTopic,
+    weakest,
+    rareAnswerGroups,
+    mastery,
+  };
 }

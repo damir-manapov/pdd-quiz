@@ -69,6 +69,15 @@ export function StatsView({ stats }: StatsViewProps) {
               </Text>
             </View>
           ))}
+
+          <Text style={styles.subheader}>{strings.statsRareAnswerGroups}</Text>
+          {stats.rareAnswerGroups.map((group) => (
+            <View key={group.answerCount} style={styles.statRow}>
+              <Text style={styles.statLabel}>
+                {strings.statsAnswersForQuestions(group.answerCount, group.questionCount)}
+              </Text>
+            </View>
+          ))}
         </>
       )}
     </View>

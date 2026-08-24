@@ -261,4 +261,24 @@ describe('computeStats', () => {
     expect(mastery.lastCorrect).toBe(2);
     expect(mastery.lastThreeCorrect).toBe(1);
   });
+
+  it('groups the three lowest answer counts across questions', () => {
+    const questions = Array.from({ length: 8 }, (_, index) => question(String(index + 1)));
+    const history = [
+      ...Array.from({ length: 2 }, (_, index) => answer('1', true, `2026-01-0${index + 1}`)),
+      ...Array.from({ length: 2 }, (_, index) => answer('2', true, `2026-02-0${index + 1}`)),
+      ...Array.from({ length: 3 }, (_, index) => answer('3', true, `2026-03-0${index + 1}`)),
+      ...Array.from({ length: 3 }, (_, index) => answer('4', true, `2026-04-0${index + 1}`)),
+      ...Array.from({ length: 3 }, (_, index) => answer('5', true, `2026-05-0${index + 1}`)),
+      ...Array.from({ length: 4 }, (_, index) => answer('6', true, `2026-06-0${index + 1}`)),
+      ...Array.from({ length: 5 }, (_, index) => answer('7', true, `2026-07-0${index + 1}`)),
+      ...Array.from({ length: 5 }, (_, index) => answer('8', true, `2026-08-0${index + 1}`)),
+    ];
+
+    expect(computeStats(history, questions).rareAnswerGroups).toEqual([
+      { answerCount: 2, questionCount: 2 },
+      { answerCount: 3, questionCount: 3 },
+      { answerCount: 4, questionCount: 1 },
+    ]);
+  });
 });

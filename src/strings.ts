@@ -29,6 +29,9 @@ export const strings = {
   statsOverall: 'Всего ответов',
   statsAccuracy: 'Точность',
   statsByTopic: 'По темам',
+  statsRareAnswerGroups: 'Редко отвечаемые вопросы',
+  statsAnswersForQuestions: (answers: number, questions: number): string =>
+    `${answers} отв. — ${questions} вопр.`,
   statsWeakest: 'Слабые вопросы',
   statsMastery: 'Освоение',
   statsQuestionsTotal: 'Всего вопросов',
