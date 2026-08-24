@@ -211,7 +211,7 @@ describe('orderQuestions least-answered', () => {
   });
 });
 
-describe('orderQuestions incorrect-streak', () => {
+describe('orderQuestions has-two-incorrect', () => {
   it('puts questions with a recent pair of incorrect answers first', () => {
     const questions = [question('1'), question('2'), question('3')];
     const history = [
@@ -224,7 +224,7 @@ describe('orderQuestions incorrect-streak', () => {
     ];
     const ordered = orderQuestions(
       questions,
-      'incorrect-streak',
+      'has-two-incorrect',
       history,
       'standard',
       seededRandom([0.5]),
@@ -241,54 +241,11 @@ describe('orderQuestions incorrect-streak', () => {
     ];
     const ordered = orderQuestions(
       questions,
-      'incorrect-streak',
-      history,
-      'standard',
-      seededRandom([0.5]),
-    );
-    expect(ordered[0]?.id).toBe('2');
-  });
-});
-
-describe('orderQuestions has-two-incorrect', () => {
-  it('prioritises any recent pair of consecutive incorrect answers even if a later answer was correct', () => {
-    const questions = [question('1'), question('2')];
-    const history = [
-      answer('1', true, '2026-01-01'),
-      answer('1', false, '2026-01-02'),
-      answer('1', false, '2026-01-03'),
-      answer('1', true, '2026-01-04'),
-      answer('2', true, '2026-01-05'),
-      answer('2', true, '2026-01-06'),
-    ];
-
-    const ordered = orderQuestions(
-      questions,
       'has-two-incorrect',
       history,
       'standard',
       seededRandom([0.5]),
     );
-
-    expect(ordered[0]?.id).toBe('1');
-  });
-
-  it('ignores a pair older than the last ten answers', () => {
-    const questions = [question('1'), question('2')];
-    const history = [
-      answer('1', false, '2026-01-01'),
-      answer('1', false, '2026-01-02'),
-      ...Array.from({ length: 10 }, (_, index) => answer('1', true, `2026-02-${index + 1}`)),
-    ];
-
-    const ordered = orderQuestions(
-      questions,
-      'has-two-incorrect',
-      history,
-      'standard',
-      seededRandom([0.5]),
-    );
-
     expect(ordered[0]?.id).toBe('2');
   });
 });

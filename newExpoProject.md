@@ -305,3 +305,21 @@ auditConfig:
 ```
 Plain `pnpm audit` reads that list, exits 0, and never rewrites the file — and each ignore is an
 explicit, greppable line you can annotate with *why* it's safe.
+
+### Confirm destructive actions in mobile flows
+Actions such as restarting a session, discarding a draft, or replacing imported data should
+show a native confirmation dialog before mutating state. Keep the destructive operation in
+the confirmation callback, provide an explicit cancel action, and make cancellation the
+non-destructive default. This protects progress from accidental taps and hardware gestures.
+
+### Answer feedback should explain the result, not only color it
+After an answer is selected, show the result, the user's selected answer, and the correct
+answer when they differ. Keep the explanation in the same review area so the user can connect
+the mistake to the rule without scanning back through the question. Test the domain result
+separately from the native presentation layer.
+
+### Keep adaptive modes semantically distinct
+Before adding a new history-based ordering mode, compare its predicate with existing modes.
+Two labels can sound different while producing identical results, which makes the selector
+confusing and increases maintenance cost. Name the predicate precisely, centralise the shared
+recent-history calculation, and add a test for the boundary window plus a later correct answer.

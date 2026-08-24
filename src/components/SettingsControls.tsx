@@ -24,7 +24,6 @@ const ORDERS: QuestionOrder[] = [
   'weakest',
   'stale',
   'least-answered',
-  'incorrect-streak',
   'has-two-incorrect',
   'least-correct-streak',
 ];
@@ -67,7 +66,10 @@ export function SettingsControls({
       <TouchableOpacity style={styles.subheaderToggle} onPress={() => setCategoryOpen((v) => !v)}>
         <Text style={styles.subheader}>{strings.category}</Text>
         <Text style={styles.subheaderToggleValue}>
-          {(topic ?? strings.allCategories) + (categoryOpen ? '  ▲' : '  ▼')}
+          {topic ?? strings.allCategories}
+          <Text style={styles.subheaderToggleIndicator}>
+            {categoryOpen ? strings.categoryOpen : strings.categoryClosed}
+          </Text>
         </Text>
       </TouchableOpacity>
       {categoryOpen ? (

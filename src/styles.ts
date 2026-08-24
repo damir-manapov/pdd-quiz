@@ -47,6 +47,11 @@ export const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
+  subheaderToggleIndicator: {
+    color: colors.textMuted,
+    fontSize: 13,
+    marginLeft: 6,
+  },
   muted: {
     color: colors.textMuted,
     fontSize: 14,
@@ -112,6 +117,37 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 8,
+  },
+  feedbackPanel: {
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  feedbackPanelCorrect: {
+    backgroundColor: '#14532d',
+  },
+  feedbackPanelIncorrect: {
+    backgroundColor: '#7f1d1d',
+  },
+  feedbackLabel: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+    textTransform: 'uppercase',
+  },
+  feedbackAnswer: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 21,
+    marginTop: 2,
+  },
+  correctAnswerBlock: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(248, 250, 252, 0.2)',
+    marginTop: 10,
+    paddingTop: 6,
   },
   feedbackCorrect: {
     color: colors.correct,

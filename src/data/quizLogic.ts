@@ -12,7 +12,6 @@ export type QuestionOrder =
   | 'weakest'
   | 'stale'
   | 'least-answered'
-  | 'incorrect-streak'
   | 'has-two-incorrect'
   | 'least-correct-streak';
 
@@ -114,7 +113,6 @@ type Weakness = {
   accuracy: number;
   lastAnsweredAt: string;
   total: number;
-  hasRecentIncorrectStreak: boolean;
   hasTwoIncorrectConsecutively: boolean;
   recentCorrectStreak: number;
 };
@@ -142,7 +140,6 @@ function weaknessOf(
       accuracy: -1,
       lastAnsweredAt: '',
       total: 0,
-      hasRecentIncorrectStreak: false,
       hasTwoIncorrectConsecutively: false,
       recentCorrectStreak: 0,
     };
@@ -153,11 +150,9 @@ function weaknessOf(
     '',
   );
   let incorrectStreak = 0;
-  let hasRecentIncorrectStreak = false;
   let hasTwoIncorrectConsecutively = false;
   for (const answer of recent) {
     incorrectStreak = answer.correct ? 0 : incorrectStreak + 1;
-    if (incorrectStreak >= 2) hasRecentIncorrectStreak = true;
     if (!answer.correct && incorrectStreak >= 2) {
       hasTwoIncorrectConsecutively = true;
     }
@@ -170,7 +165,6 @@ function weaknessOf(
     accuracy: correct / recent.length,
     lastAnsweredAt,
     total: recent.length,
-    hasRecentIncorrectStreak,
     hasTwoIncorrectConsecutively,
     recentCorrectStreak,
   };
@@ -193,13 +187,6 @@ function compareLeastAnswered(a: Weakness, b: Weakness): number {
   return a.total - b.total;
 }
 
-function compareIncorrectStreak(a: Weakness, b: Weakness): number {
-  if (a.hasRecentIncorrectStreak !== b.hasRecentIncorrectStreak) {
-    return a.hasRecentIncorrectStreak ? -1 : 1;
-  }
-  return compareWeakness(a, b);
-}
-
 function compareHasTwoIncorrect(a: Weakness, b: Weakness): number {
   if (a.hasTwoIncorrectConsecutively !== b.hasTwoIncorrectConsecutively) {
     return a.hasTwoIncorrectConsecutively ? -1 : 1;
@@ -217,7 +204,6 @@ function compareLeastCorrectStreak(a: Weakness, b: Weakness): number {
 function comparatorFor(order: QuestionOrder): (a: Weakness, b: Weakness) => number {
   if (order === 'stale') return compareStale;
   if (order === 'least-answered') return compareLeastAnswered;
-  if (order === 'incorrect-streak') return compareIncorrectStreak;
   if (order === 'has-two-incorrect') return compareHasTwoIncorrect;
   if (order === 'least-correct-streak') return compareLeastCorrectStreak;
   return compareWeakness;

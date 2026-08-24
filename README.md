@@ -1,19 +1,26 @@
 # pdd-quiz
 
 Offline, Russian-language Expo app for preparing for the traffic-laws (ПДД) exam.
-Multiple-choice quizzes are built from an officially-sourced question bank and stored
-locally in SQLite, so the app works with no network connection and no accounts.
+It includes 800 questions across 37 topics, with explanations and adaptive review
+tools. Answer history is stored locally in SQLite, so the app works with no network
+connection and no accounts.
 
 ## Features
 
 - Multiple-choice quizzes over the official ПДД ticket bank (question text, image, and
   official answer options), with the correct answer keyed by a stable option id so option
   order can be shuffled freely.
-- Question ordering: sequential, random, or **weakest-first** (adaptive — recently missed
-  and never-seen questions surface first, per quiz mode).
-- Answer history persisted locally in SQLite; per-topic and overall accuracy stats.
+- Seven question-ordering modes: sequential, random, weakest questions, questions not
+  reviewed recently, least-answered questions, questions with two consecutive mistakes,
+  and questions with fewer consecutive correct answers.
+- Answer feedback highlights the selected answer, shows the correct answer after a
+  mistake, and displays the question explanation.
+- Answer history persisted locally in SQLite; overall, per-topic, mastery, and streak
+  statistics are available.
 - Android hardware back is intercepted while a quiz is active so the app does not close
   mid-question; the back button remains available when the app is idle.
+- Restarting a completed session requires confirmation so progress is not discarded by
+  accident.
 - Local backup/restore of answer history to a JSON file (share sheet on iOS, file picker
   on import) — no backend, no accounts, fully offline.
 
@@ -73,6 +80,8 @@ npx eas-cli build --platform android --profile preview
 Requires `eas login` on first use; the EAS `projectId` is created on the first build. The
 gitignored generated assets are rebuilt on the EAS server by the `eas-build-post-install`
 npm hook (which runs `codegen`), so no manual codegen step is needed before a build.
+The current icon, Android adaptive icon layers, splash image, and web favicon are stored
+in `assets/` and referenced by `app.json`; verify them on target devices before release.
 
 ## Project structure
 

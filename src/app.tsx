@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   BackHandler,
   ScrollView,
   Text,
@@ -113,7 +114,15 @@ export default function App() {
               <View style={{ marginTop: 16 }}>
                 <StatsView stats={stats} />
               </View>
-              <TouchableOpacity style={styles.button} onPress={quiz.restart}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() =>
+                  Alert.alert(strings.restartConfirmTitle, strings.restartConfirmMessage, [
+                    { text: strings.cancel, style: 'cancel' },
+                    { text: strings.confirm, onPress: quiz.restart },
+                  ])
+                }
+              >
                 <Text style={styles.buttonText}>{strings.restart}</Text>
               </TouchableOpacity>
             </View>

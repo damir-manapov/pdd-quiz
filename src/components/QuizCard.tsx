@@ -14,6 +14,8 @@ export function QuizCard({ question, selectedOptionId, onSelect }: QuizCardProps
   const answered = selectedOptionId !== null;
   const wasCorrect = selectedOptionId === question.correctOptionId;
   const imageSource = question.imagePath ? imageAssets[question.imagePath] : undefined;
+  const selectedOption = question.options.find((option) => option.id === selectedOptionId);
+  const correctOption = question.options.find((option) => option.id === question.correctOptionId);
 
   return (
     <View style={styles.card}>
@@ -42,7 +44,12 @@ export function QuizCard({ question, selectedOptionId, onSelect }: QuizCardProps
       })}
 
       {answered ? (
-        <View>
+        <View
+          style={[
+            styles.feedbackPanel,
+            wasCorrect ? styles.feedbackPanelCorrect : styles.feedbackPanelIncorrect,
+          ]}
+        >
           <Text
             style={[
               styles.feedback,
@@ -51,6 +58,14 @@ export function QuizCard({ question, selectedOptionId, onSelect }: QuizCardProps
           >
             {wasCorrect ? strings.correct : strings.incorrect}
           </Text>
+          <Text style={styles.feedbackLabel}>{strings.yourAnswer}</Text>
+          <Text style={styles.feedbackAnswer}>{selectedOption?.text}</Text>
+          {!wasCorrect ? (
+            <View style={styles.correctAnswerBlock}>
+              <Text style={styles.feedbackLabel}>{strings.correctAnswer}</Text>
+              <Text style={styles.feedbackAnswer}>{correctOption?.text}</Text>
+            </View>
+          ) : null}
           {question.explanation !== undefined ? (
             <View style={styles.explanationBox}>
               <Text style={styles.explanationText}>{question.explanation}</Text>

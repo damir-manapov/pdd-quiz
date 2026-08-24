@@ -24,10 +24,10 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "expo": "~57.0.9",
+    "expo": "~57.0.16",
     "expo-file-system": "~57.0.1",
-    "expo-sharing": "~57.0.8",
-    "expo-splash-screen": "~57.0.7",
+    "expo-sharing": "~57.0.15",
+    "expo-splash-screen": "~57.0.8",
     "expo-sqlite": "~57.0.1",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
