@@ -8,6 +8,8 @@ export const strings = {
   restart: 'Заново',
   restartConfirmTitle: 'Начать новую сессию?',
   restartConfirmMessage: 'Текущая сессия будет завершена.',
+  leaveQuizTitle: 'Завершить сессию?',
+  leaveQuizMessage: 'Ваши ответы сохранятся, но текущая сессия будет завершена.',
   cancel: 'Отмена',
   confirm: 'Начать',
   next: 'Далее',

@@ -44,11 +44,11 @@ const answer = (
 ): AnswerRecord => ({ questionId, mode: 'standard', optionId, correct, answeredAt });
 
 describe('shouldHandleBack', () => {
-  it('intercepts the Android back button during a live quiz or summary', () => {
+  it('intercepts the Android back button only during a live quiz', () => {
     expect(shouldHandleBack('ready')).toBe(false);
     expect(shouldHandleBack('active')).toBe(true);
-    expect(shouldHandleBack('finished')).toBe(true);
-    expect(shouldHandleBack('loading')).toBe(true);
+    expect(shouldHandleBack('finished')).toBe(false);
+    expect(shouldHandleBack('loading')).toBe(false);
   });
 });
 

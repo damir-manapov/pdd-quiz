@@ -33,11 +33,15 @@ export default function App() {
       if (!shouldHandleBack(quiz.status)) {
         return false;
       }
+      Alert.alert(strings.leaveQuizTitle, strings.leaveQuizMessage, [
+        { text: strings.cancel, style: 'cancel' },
+        { text: strings.confirm, onPress: quiz.restart },
+      ]);
       return true;
     });
 
     return () => subscription.remove();
-  }, [quiz.status]);
+  }, [quiz.status, quiz.restart]);
 
   return (
     <SafeAreaProvider>
