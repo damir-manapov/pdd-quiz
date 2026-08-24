@@ -6,7 +6,13 @@ import type { QuizOption, QuizQuestion } from './questions';
 export type QuizMode = 'standard';
 export const ALL_MODES: QuizMode[] = ['standard'];
 
-export type QuestionOrder = 'sequential' | 'random' | 'weakest' | 'stale' | 'least-answered';
+export type QuestionOrder =
+  | 'sequential'
+  | 'random'
+  | 'weakest'
+  | 'stale'
+  | 'least-answered'
+  | 'incorrect-streak';
 
 export type SessionQuestion = {
   id: string;
@@ -102,7 +108,12 @@ export function buildSessionQuestion(
   };
 }
 
-type Weakness = { accuracy: number; lastAnsweredAt: string; total: number };
+type Weakness = {
+  accuracy: number;
+  lastAnsweredAt: string;
+  total: number;
+  hasRecentIncorrectStreak: boolean;
+};
 
 function recentForQuestion(
   history: readonly AnswerRecord[],
@@ -123,14 +134,25 @@ function weaknessOf(
   const recent = recentForQuestion(history, questionId, mode);
   if (recent.length === 0) {
     // Never answered sorts first: accuracy -1 beats any real accuracy, '' beats any timestamp.
-    return { accuracy: -1, lastAnsweredAt: '', total: 0 };
+    return { accuracy: -1, lastAnsweredAt: '', total: 0, hasRecentIncorrectStreak: false };
   }
   const correct = recent.filter((answer) => answer.correct).length;
   const lastAnsweredAt = recent.reduce(
     (latest, answer) => (answer.answeredAt > latest ? answer.answeredAt : latest),
     '',
   );
-  return { accuracy: correct / recent.length, lastAnsweredAt, total: recent.length };
+  let incorrectStreak = 0;
+  let hasRecentIncorrectStreak = false;
+  for (const answer of recent) {
+    incorrectStreak = answer.correct ? 0 : incorrectStreak + 1;
+    if (incorrectStreak >= 2) hasRecentIncorrectStreak = true;
+  }
+  return {
+    accuracy: correct / recent.length,
+    lastAnsweredAt,
+    total: recent.length,
+    hasRecentIncorrectStreak,
+  };
 }
 
 function compareWeakness(a: Weakness, b: Weakness): number {
@@ -150,9 +172,17 @@ function compareLeastAnswered(a: Weakness, b: Weakness): number {
   return a.total - b.total;
 }
 
+function compareIncorrectStreak(a: Weakness, b: Weakness): number {
+  if (a.hasRecentIncorrectStreak !== b.hasRecentIncorrectStreak) {
+    return a.hasRecentIncorrectStreak ? -1 : 1;
+  }
+  return compareWeakness(a, b);
+}
+
 function comparatorFor(order: QuestionOrder): (a: Weakness, b: Weakness) => number {
   if (order === 'stale') return compareStale;
   if (order === 'least-answered') return compareLeastAnswered;
+  if (order === 'incorrect-streak') return compareIncorrectStreak;
   return compareWeakness;
 }
 

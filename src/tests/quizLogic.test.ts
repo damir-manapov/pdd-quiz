@@ -201,6 +201,45 @@ describe('orderQuestions least-answered', () => {
   });
 });
 
+describe('orderQuestions incorrect-streak', () => {
+  it('puts questions with a recent pair of incorrect answers first', () => {
+    const questions = [question('1'), question('2'), question('3')];
+    const history = [
+      answer('1', true, '2026-01-01'),
+      answer('1', true, '2026-01-02'),
+      answer('1', true, '2026-01-03'),
+      answer('2', true, '2026-01-01'),
+      answer('2', false, '2026-01-02'),
+      answer('2', false, '2026-01-03'),
+    ];
+    const ordered = orderQuestions(
+      questions,
+      'incorrect-streak',
+      history,
+      'standard',
+      seededRandom([0.5]),
+    );
+    expect(ordered[0]?.id).toBe('2');
+  });
+
+  it('ignores an incorrect pair outside the last ten answers', () => {
+    const questions = [question('1'), question('2')];
+    const history = [
+      answer('1', false, '2026-01-01'),
+      answer('1', false, '2026-01-02'),
+      ...Array.from({ length: 10 }, (_, index) => answer('1', true, `2026-02-${index + 1}`)),
+    ];
+    const ordered = orderQuestions(
+      questions,
+      'incorrect-streak',
+      history,
+      'standard',
+      seededRandom([0.5]),
+    );
+    expect(ordered[0]?.id).toBe('2');
+  });
+});
+
 describe('buildSession', () => {
   it('respects the requested count and only eligible questions', () => {
     const questions = [question('1'), question('2'), { ...question('3'), correctOptionId: 'bad' }];

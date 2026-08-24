@@ -14,7 +14,14 @@ export type SettingsControlsProps = {
   backupBusy: boolean;
 };
 
-const ORDERS: QuestionOrder[] = ['sequential', 'random', 'weakest', 'stale', 'least-answered'];
+const ORDERS: QuestionOrder[] = [
+  'sequential',
+  'random',
+  'weakest',
+  'stale',
+  'least-answered',
+  'incorrect-streak',
+];
 const SESSION_SIZES = [10, 20, 40];
 
 export function SettingsControls({

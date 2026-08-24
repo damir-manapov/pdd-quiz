@@ -16,6 +16,7 @@ export const strings = {
   orderWeakest: 'Сложные сначала',
   orderStale: 'Давние сначала',
   orderLeastAnswered: 'Редкие сначала',
+  orderIncorrectStreak: 'После двух ошибок',
   sessionSize: 'Вопросов в сессии',
   question: (index: number, total: number): string => `Вопрос ${index} из ${total}`,
   correct: 'Верно',
@@ -64,4 +65,5 @@ export const orderLabels: Record<QuestionOrder, string> = {
   weakest: strings.orderWeakest,
   stale: strings.orderStale,
   'least-answered': strings.orderLeastAnswered,
+  'incorrect-streak': strings.orderIncorrectStreak,
 };
