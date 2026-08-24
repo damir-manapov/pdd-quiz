@@ -260,6 +260,32 @@ describe('computeStats', () => {
     expect(mastery.everCorrect).toBe(3);
     expect(mastery.lastCorrect).toBe(2);
     expect(mastery.lastThreeCorrect).toBe(1);
+    expect(mastery.lastTwoCorrect).toBe(1);
+    expect(mastery.everTwoIncorrect).toBe(0);
+    expect(mastery.everThreeIncorrect).toBe(0);
+  });
+
+  it('distinguishes the last two correct from incorrect streaks anywhere in history', () => {
+    const questions = [question('1'), question('2'), question('3')];
+    const history = [
+      answer('1', false, '2026-01-01'),
+      answer('1', false, '2026-01-02'),
+      answer('1', true, '2026-01-03'),
+      answer('1', true, '2026-01-04'),
+      answer('2', false, '2026-02-01'),
+      answer('2', false, '2026-02-02'),
+      answer('2', false, '2026-02-03'),
+      answer('2', true, '2026-02-04'),
+      answer('3', true, '2026-03-01'),
+      answer('3', true, '2026-03-02'),
+      answer('3', false, '2026-03-03'),
+      answer('3', false, '2026-03-04'),
+    ];
+
+    const { mastery } = computeStats(history, questions);
+    expect(mastery.lastTwoCorrect).toBe(1);
+    expect(mastery.everTwoIncorrect).toBe(3);
+    expect(mastery.everThreeIncorrect).toBe(1);
   });
 
   it('groups the three lowest answer counts across questions', () => {

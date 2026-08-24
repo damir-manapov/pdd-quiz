@@ -219,6 +219,9 @@ export type MasteryStats = {
   everCorrect: number; // answered correctly at least once
   lastCorrect: number; // most recent answer was correct
   lastThreeCorrect: number; // the three most recent answers were all correct
+  lastTwoCorrect: number; // the two most recent answers were both correct
+  everTwoIncorrect: number; // at least two incorrect answers were consecutive
+  everThreeIncorrect: number; // at least three incorrect answers were consecutive
 };
 
 export function computeStats(
@@ -280,6 +283,9 @@ export function computeStats(
     everCorrect: 0,
     lastCorrect: 0,
     lastThreeCorrect: 0,
+    lastTwoCorrect: 0,
+    everTwoIncorrect: 0,
+    everThreeIncorrect: 0,
   };
   for (const list of byQuestion.values()) {
     const sorted = [...list].sort((a, b) => a.answeredAt.localeCompare(b.answeredAt));
@@ -289,6 +295,20 @@ export function computeStats(
     if (lastThree.length === 3 && lastThree.every((answer) => answer.correct)) {
       mastery.lastThreeCorrect += 1;
     }
+    const lastTwo = sorted.slice(-2);
+    if (lastTwo.length === 2 && lastTwo.every((answer) => answer.correct)) {
+      mastery.lastTwoCorrect += 1;
+    }
+    let incorrectStreak = 0;
+    let hasTwoIncorrect = false;
+    let hasThreeIncorrect = false;
+    for (const answer of sorted) {
+      incorrectStreak = answer.correct ? 0 : incorrectStreak + 1;
+      if (incorrectStreak >= 2) hasTwoIncorrect = true;
+      if (incorrectStreak >= 3) hasThreeIncorrect = true;
+    }
+    if (hasTwoIncorrect) mastery.everTwoIncorrect += 1;
+    if (hasThreeIncorrect) mastery.everThreeIncorrect += 1;
     let correctStreak = 0;
     for (let index = sorted.length - 1; index >= 0 && sorted[index]?.correct; index -= 1) {
       correctStreak += 1;

@@ -46,6 +46,24 @@ export function StatsView({ stats }: StatsViewProps) {
           {mastery.lastThreeCorrect} / {outOf}
         </Text>
       </View>
+      <View style={styles.statRow}>
+        <Text style={styles.statLabel}>{strings.statsLastTwoCorrect}</Text>
+        <Text style={styles.statValue}>
+          {mastery.lastTwoCorrect} / {outOf}
+        </Text>
+      </View>
+      <View style={styles.statRow}>
+        <Text style={styles.statLabel}>{strings.statsEverTwoIncorrect}</Text>
+        <Text style={styles.statValue}>
+          {mastery.everTwoIncorrect} / {outOf}
+        </Text>
+      </View>
+      <View style={styles.statRow}>
+        <Text style={styles.statLabel}>{strings.statsEverThreeIncorrect}</Text>
+        <Text style={styles.statValue}>
+          {mastery.everThreeIncorrect} / {outOf}
+        </Text>
+      </View>
 
       {stats.total === 0 ? (
         <Text style={styles.muted}>{strings.statsEmpty}</Text>
