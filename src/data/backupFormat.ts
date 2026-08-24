@@ -1,6 +1,6 @@
 import type { AnswerRecord } from './quizLogic';
 
-// Deliberately dependency-free from the rest of data/ (blueprint §6.2): the backup file's
+// Deliberately dependency-free from the rest of data/: the backup file's
 // shape is self-contained and validated inline, so it can be reasoned about in isolation and
 // old exports keep validating as new optional fields are added.
 export type AnswersBackup = {

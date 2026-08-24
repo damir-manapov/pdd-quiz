@@ -4,9 +4,6 @@ Offline, Russian-language Expo app for preparing for the traffic-laws (ПДД) e
 Multiple-choice quizzes are built from an officially-sourced question bank and stored
 locally in SQLite, so the app works with no network connection and no accounts.
 
-See [PROJECT_BLUEPRINT.md](PROJECT_BLUEPRINT.md) for the full architecture and design
-decisions.
-
 ## Features
 
 - Multiple-choice quizzes over the official ПДД ticket bank (question text, image, and

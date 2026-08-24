@@ -1,4 +1,4 @@
-// One-time ETL/codegen step (blueprint §10/§11.5): takes the scraped official ПДД dataset
+// One-time ETL/codegen step: takes the scraped official ПДД dataset
 // in ../data and produces the bundled app assets + a static image-asset lookup table.
 //
 //   data/pdd.json      -> assets/questions.json           (the question bank the app loads)
@@ -60,7 +60,7 @@ if (!Array.isArray(questions)) {
   throw new Error('Source dataset has no "questions" array');
 }
 
-// --- Fidelity checks (blueprint §7): fail loudly on transcription/import mistakes ---
+// --- Fidelity checks: fail loudly on transcription/import mistakes ---
 const errors: string[] = [];
 const seenIds = new Set<unknown>();
 for (const q of questions) {

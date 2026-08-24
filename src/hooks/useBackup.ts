@@ -11,7 +11,7 @@ export type UseBackup = {
 };
 
 // Wraps backup export/import with busy-state + Alert feedback. Cancellation stays silent
-// (no error alert); only genuine failures alert (blueprint §6.3).
+// (no error alert); only genuine failures alert.
 export function useBackup(onImported: () => void): UseBackup {
   const [busy, setBusy] = useState<boolean>(false);
 

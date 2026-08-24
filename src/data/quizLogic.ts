@@ -1,8 +1,8 @@
 import type { QuizOption, QuizQuestion } from './questions';
 
 // Only one mode is supported today (the official ticket presented as-is), but the whole
-// module is written to generalise over "any mode string" so adding a mode later (blueprint
-// §4.2) touches only this union, ALL_MODES, buildSessionQuestion, and the UI label record.
+// module is written to generalise over "any mode string" so adding a mode later touches only
+// this union, ALL_MODES, buildSessionQuestion, and the UI label record.
 export type QuizMode = 'standard';
 export const ALL_MODES: QuizMode[] = ['standard'];
 
@@ -46,7 +46,7 @@ export function shuffle<T>(items: readonly T[], random: () => number = Math.rand
   return result;
 }
 
-// Weighted random sampling without replacement (blueprint §5): every candidate can still be
+// Weighted random sampling without replacement: every candidate can still be
 // picked (weights are clamped to >= 0), higher weights are more likely to come out first.
 export function weightedSample<T>(
   candidates: readonly { item: T; weight: number }[],
