@@ -78,6 +78,15 @@ export function StatsView({ stats }: StatsViewProps) {
               </Text>
             </View>
           ))}
+
+          <Text style={styles.subheader}>{strings.statsRareCorrectStreakGroups}</Text>
+          {stats.rareCorrectStreakGroups.map((group) => (
+            <View key={group.correctCount} style={styles.statRow}>
+              <Text style={styles.statLabel}>
+                {strings.statsCorrectForQuestions(group.correctCount, group.questionCount)}
+              </Text>
+            </View>
+          ))}
         </>
       )}
     </View>

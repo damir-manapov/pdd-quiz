@@ -32,6 +32,9 @@ export const strings = {
   statsRareAnswerGroups: 'Редко отвечаемые вопросы',
   statsAnswersForQuestions: (answers: number, questions: number): string =>
     `${answers} отв. — ${questions} вопр.`,
+  statsRareCorrectStreakGroups: 'Редкие серии правильных ответов',
+  statsCorrectForQuestions: (correct: number, questions: number): string =>
+    `${correct} верн. подряд — ${questions} вопр.`,
   statsWeakest: 'Слабые вопросы',
   statsMastery: 'Освоение',
   statsQuestionsTotal: 'Всего вопросов',

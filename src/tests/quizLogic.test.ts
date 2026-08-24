@@ -281,4 +281,28 @@ describe('computeStats', () => {
       { answerCount: 4, questionCount: 1 },
     ]);
   });
+
+  it('groups the three lowest current correct streaks across questions', () => {
+    const questions = Array.from({ length: 5 }, (_, index) => question(String(index + 1)));
+    const history = [
+      answer('1', false, '2026-01-01'),
+      answer('1', true, '2026-01-02'),
+      answer('1', true, '2026-01-03'),
+      answer('2', false, '2026-02-01'),
+      answer('2', true, '2026-02-02'),
+      answer('3', false, '2026-03-01'),
+      answer('4', true, '2026-04-01'),
+      answer('4', true, '2026-04-02'),
+      answer('5', true, '2026-05-01'),
+      answer('5', true, '2026-05-02'),
+      answer('5', true, '2026-05-03'),
+      answer('5', true, '2026-05-04'),
+    ];
+
+    expect(computeStats(history, questions).rareCorrectStreakGroups).toEqual([
+      { correctCount: 0, questionCount: 1 },
+      { correctCount: 1, questionCount: 1 },
+      { correctCount: 2, questionCount: 2 },
+    ]);
+  });
 });

@@ -200,6 +200,7 @@ export function getProgressPercent(answered: number, total: number): number {
 export type TopicStat = { topic: string; total: number; correct: number; accuracy: number };
 export type QuestionStat = { questionId: string; total: number; correct: number; accuracy: number };
 export type AnswerCountGroup = { answerCount: number; questionCount: number };
+export type CorrectStreakGroup = { correctCount: number; questionCount: number };
 export type OverallStats = {
   total: number;
   correct: number;
@@ -207,6 +208,7 @@ export type OverallStats = {
   byTopic: TopicStat[];
   weakest: QuestionStat[];
   rareAnswerGroups: AnswerCountGroup[];
+  rareCorrectStreakGroups: CorrectStreakGroup[];
   mastery: MasteryStats;
 };
 
@@ -271,6 +273,7 @@ export function computeStats(
     list.push(answer);
     byQuestion.set(answer.questionId, list);
   }
+  const correctStreakByQuestion = new Map<string, number>();
   const mastery: MasteryStats = {
     totalQuestions: questions.length,
     attempted: byQuestion.size,
@@ -286,7 +289,21 @@ export function computeStats(
     if (lastThree.length === 3 && lastThree.every((answer) => answer.correct)) {
       mastery.lastThreeCorrect += 1;
     }
+    let correctStreak = 0;
+    for (let index = sorted.length - 1; index >= 0 && sorted[index]?.correct; index -= 1) {
+      correctStreak += 1;
+    }
+    correctStreakByQuestion.set(list[0]?.questionId ?? '', correctStreak);
   }
+  const correctStreakGroups = new Map<number, number>();
+  for (const question of questions) {
+    const correctCount = correctStreakByQuestion.get(question.id) ?? 0;
+    correctStreakGroups.set(correctCount, (correctStreakGroups.get(correctCount) ?? 0) + 1);
+  }
+  const rareCorrectStreakGroups = [...correctStreakGroups.entries()]
+    .map(([correctCount, questionCount]) => ({ correctCount, questionCount }))
+    .sort((a, b) => a.correctCount - b.correctCount)
+    .slice(0, 3);
 
   const total = filtered.length;
   const correct = filtered.filter((answer) => answer.correct).length;
@@ -297,6 +314,7 @@ export function computeStats(
     byTopic,
     weakest,
     rareAnswerGroups,
+    rareCorrectStreakGroups,
     mastery,
   };
 }
