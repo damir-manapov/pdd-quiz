@@ -58,6 +58,9 @@ export function QuizCard({ question, selectedOptionId, onSelect }: QuizCardProps
           ) : null}
         </View>
       ) : null}
+      <Text style={styles.muted}>
+        {strings.category}: {question.topic}
+      </Text>
     </View>
   );
 }

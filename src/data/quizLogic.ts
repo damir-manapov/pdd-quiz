@@ -198,9 +198,15 @@ export function orderQuestions(
   // History-based orders: pre-shuffle so tied entries (e.g. all never-answered) come out in
   // random order. Array.sort is stable, so the shuffle survives among entries that compare equal.
   const compare = comparatorFor(order);
-  return shuffle(questions, random).sort((a, b) =>
-    compare(weaknessOf(history, a.id, mode), weaknessOf(history, b.id, mode)),
+  const weaknessByQuestion = new Map(
+    questions.map((question) => [question.id, weaknessOf(history, question.id, mode)]),
   );
+  return shuffle(questions, random).sort((a, b) => {
+    const weaknessA = weaknessByQuestion.get(a.id);
+    const weaknessB = weaknessByQuestion.get(b.id);
+    if (weaknessA === undefined || weaknessB === undefined) return 0;
+    return compare(weaknessA, weaknessB);
+  });
 }
 
 export function buildSession(
@@ -210,8 +216,12 @@ export function buildSession(
   count: number,
   history: readonly AnswerRecord[],
   random: () => number = Math.random,
+  topic?: string | null,
 ): SessionQuestion[] {
-  const eligible = questions.filter((question) => isEligibleForMode(question, mode));
+  const eligible = questions.filter(
+    (question) =>
+      isEligibleForMode(question, mode) && (topic === undefined || topic === null || question.topic === topic),
+  );
   const ordered = orderQuestions(eligible, order, history, mode, random);
   return ordered
     .slice(0, Math.max(0, count))

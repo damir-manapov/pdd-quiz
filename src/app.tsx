@@ -33,6 +33,9 @@ export default function App() {
               <SettingsControls
                 order={quiz.order}
                 onOrderChange={quiz.setOrder}
+                topic={quiz.topic}
+                topics={quiz.topics}
+                onTopicChange={quiz.setTopic}
                 sessionSize={quiz.sessionSize}
                 onSessionSizeChange={quiz.setSessionSize}
                 onShowStats={() => setShowStats((value) => !value)}

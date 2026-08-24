@@ -6,6 +6,9 @@ import { styles } from '../styles';
 export type SettingsControlsProps = {
   order: QuestionOrder;
   onOrderChange: (order: QuestionOrder) => void;
+  topic: string | null;
+  topics: string[];
+  onTopicChange: (topic: string | null) => void;
   sessionSize: number;
   onSessionSizeChange: (size: number) => void;
   onShowStats: () => void;
@@ -27,6 +30,9 @@ const SESSION_SIZES = [10, 20, 40];
 export function SettingsControls({
   order,
   onOrderChange,
+  topic,
+  topics,
+  onTopicChange,
   sessionSize,
   onSessionSizeChange,
   onShowStats,
@@ -48,6 +54,24 @@ export function SettingsControls({
             >
               <Text style={[styles.chipText, active ? styles.chipTextActive : null]}>
                 {orderLabels[value]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      <Text style={styles.subheader}>{strings.category}</Text>
+      <View style={styles.row}>
+        {[null, ...topics].map((value) => {
+          const active = value === topic;
+          return (
+            <TouchableOpacity
+              key={value ?? 'all'}
+              style={[styles.chip, active ? styles.chipActive : null]}
+              onPress={() => onTopicChange(value)}
+            >
+              <Text style={[styles.chipText, active ? styles.chipTextActive : null]}>
+                {value ?? strings.allCategories}
               </Text>
             </TouchableOpacity>
           );

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getAnswerHistory, recordAnswer } from '../data/database';
-import { getAllQuestions } from '../data/questions';
+import { getAllQuestions, getTopics } from '../data/questions';
 import {
   type AnswerRecord,
   buildSession,
@@ -19,6 +19,8 @@ const DEFAULT_SESSION_SIZE = 20;
 export type UseQuiz = {
   status: QuizStatus;
   order: QuestionOrder;
+  topic: string | null;
+  topics: string[];
   sessionSize: number;
   session: SessionQuestion[];
   currentIndex: number;
@@ -27,6 +29,7 @@ export type UseQuiz = {
   correctCount: number;
   history: AnswerRecord[];
   setOrder: (order: QuestionOrder) => void;
+  setTopic: (topic: string | null) => void;
   setSessionSize: (size: number) => void;
   start: () => void;
   answer: (optionId: string) => void;
@@ -39,6 +42,7 @@ export function useQuiz(): UseQuiz {
   const [history, setHistory] = useState<AnswerRecord[]>([]);
   const [status, setStatus] = useState<QuizStatus>('loading');
   const [order, setOrder] = useState<QuestionOrder>('sequential');
+  const [topic, setTopic] = useState<string | null>(null);
   const [sessionSize, setSessionSize] = useState<number>(DEFAULT_SESSION_SIZE);
   const [session, setSession] = useState<SessionQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -58,13 +62,21 @@ export function useQuiz(): UseQuiz {
   }, []);
 
   const start = useCallback(() => {
-    const built = buildSession(getAllQuestions(), MODE, order, sessionSize, history);
+    const built = buildSession(
+      getAllQuestions(),
+      MODE,
+      order,
+      sessionSize,
+      history,
+      Math.random,
+      topic,
+    );
     setSession(built);
     setCurrentIndex(0);
     setSelectedOptionId(null);
     setCorrectCount(0);
     setStatus(built.length > 0 ? 'active' : 'ready');
-  }, [order, sessionSize, history]);
+  }, [order, sessionSize, history, topic]);
 
   const answer = useCallback(
     (optionId: string) => {
@@ -116,6 +128,8 @@ export function useQuiz(): UseQuiz {
   return {
     status,
     order,
+    topic,
+    topics: getTopics(),
     sessionSize,
     session,
     currentIndex,
@@ -124,6 +138,7 @@ export function useQuiz(): UseQuiz {
     correctCount,
     history,
     setOrder,
+    setTopic,
     setSessionSize,
     start,
     answer,

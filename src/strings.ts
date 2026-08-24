@@ -11,6 +11,8 @@ export const strings = {
   hideStats: 'Скрыть статистику',
   settings: 'Настройки',
   order: 'Порядок вопросов',
+  category: 'Категория',
+  allCategories: 'Все',
   orderSequential: 'По порядку',
   orderRandom: 'Случайно',
   orderWeakest: 'Сложные сначала',

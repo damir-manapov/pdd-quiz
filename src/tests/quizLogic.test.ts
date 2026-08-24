@@ -247,6 +247,22 @@ describe('buildSession', () => {
     expect(session).toHaveLength(2);
     expect(session.map((q) => q.id)).toEqual(['1', '2']);
   });
+
+  it('filters a session by topic while all topics remain the default', () => {
+    const questions = [question('1', 'A'), question('2', 'B'), question('3', 'A')];
+    const filtered = buildSession(
+      questions,
+      'standard',
+      'sequential',
+      10,
+      [],
+      seededRandom([0.5]),
+      'A',
+    );
+    const all = buildSession(questions, 'standard', 'sequential', 10, [], seededRandom([0.5]));
+    expect(filtered.map((item) => item.id)).toEqual(['1', '3']);
+    expect(all.map((item) => item.id)).toEqual(['1', '2', '3']);
+  });
 });
 
 describe('isCorrect', () => {
